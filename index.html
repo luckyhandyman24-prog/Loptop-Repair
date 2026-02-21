@@ -558,11 +558,46 @@ btnTechA.addEventListener("click",openModal);
 modalClose.addEventListener("click",closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-/* Submit -> WhatsApp (works on Netlify without backend) */
-techForm.addEventListener("submit",(e)=>{
+/* Submit -> API + WhatsApp */
+techForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const status = document.getElementById("modalStatus");
+  if (status) status.textContent = "Sending…";
+
   const obj = Object.fromEntries(new FormData(techForm).entries());
 
+  // 1) Отправляем лид на сервер (Vercel /api/lead) -> WhatsApp API + ERPNext
+  const payload = {
+    name: obj.name || "",
+    phone: obj.phone || "",
+    city: "",
+    details: obj.problem || "",
+    source: "website-popup",
+    page: window.location.href,
+    ts: new Date().toISOString(),
+    device: obj.device || "",
+    service: obj.service || "",
+    urgency: obj.urgency || "",
+    estimate: obj.estimate || "",
+  };
+
+  try {
+    const r = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!r.ok) {
+      const t = await r.text().catch(() => "");
+      console.warn("API /api/lead failed:", r.status, t);
+    }
+  } catch (err) {
+    console.warn("API /api/lead error:", err);
+  }
+
+  // 2) Открываем WhatsApp клиенту (как было)
   const msg =
 `New technician request:
 Name: ${obj.name}
@@ -575,9 +610,11 @@ Urgency: ${obj.urgency}
 Estimate: ${obj.estimate || "not calculated"}
 Page: ${window.location.href}`;
 
-  const waNumber = "18134386556"; // change if needed
+  const waNumber = "18134386556"; // куда клиент пишет
   const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
   window.open(url, "_blank");
+
+  if (status) status.textContent = "Sent. Opening WhatsApp…";
 });
 </script>
 
