@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Tampa Tech Repair</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Inter,sans-serif}
 body{background:#f5f7fb;color:#1a2b4c}
@@ -16,20 +17,16 @@ header{background:#0e2a57;color:white;padding:12px 0;position:sticky;top:0;z-ind
 header .top{display:flex;justify-content:space-between;align-items:center;gap:16px}
 .header-left{display:flex;align-items:center;gap:12px;min-width:220px}
 
-/* ✅ Round logo */
+/* Round logo */
 .logo{
-  width:46px;height:46px;border-radius:999px; /* круг */
+  width:46px;height:46px;border-radius:999px;
   background:rgba(255,255,255,.14);
   border:1px solid rgba(255,255,255,.18);
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;flex:0 0 auto;
   box-shadow:0 10px 24px rgba(0,0,0,.18);
 }
-.logo img{
-  width:100%;height:100%;
-  object-fit:cover;        /* чтобы круг выглядел плотным */
-  display:block;
-}
+.logo img{width:100%;height:100%;object-fit:cover;display:block}
 
 .brand{display:flex;flex-direction:column;line-height:1.1}
 .brand strong{font-size:15px;font-weight:900}
@@ -49,7 +46,7 @@ header a{color:white;text-decoration:none;font-weight:900}
   background:
     linear-gradient(90deg,
       rgba(255,255,255,0.94) 0%,
-      rgba(255,255,255,0.80) 52%,
+      rgba(255,255,255,0.82) 55%,
       rgba(255,255,255,0.10) 78%
     ),
     url('assets/banner.jpg') 72% center/cover no-repeat;
@@ -57,8 +54,8 @@ header a{color:white;text-decoration:none;font-weight:900}
   text-align:left;
 }
 .hero .content{
-  max-width:600px;
-  background:rgba(255,255,255,.84);
+  max-width:640px;
+  background:rgba(255,255,255,.88);
   border:1px solid #e8eefb;
   border-radius:18px;
   padding:26px 26px 22px;
@@ -221,17 +218,16 @@ footer p{opacity:.92}
 }
 </style>
 </head>
+
 <body>
 
 <header>
   <div class="container top">
     <div class="header-left">
-      <div class="logo">
-        <img src="assets/logo.png" alt="Logo">
-      </div>
+      <div class="logo"><img src="assets/logo.png" alt="Logo"></div>
       <div class="brand">
         <strong>Tampa Tech Repair</strong>
-        <span>Computers • Tablets • Printers</span>
+        <span>Laptops • Tablets • Printers • Digital Devices</span>
       </div>
     </div>
 
@@ -245,8 +241,8 @@ footer p{opacity:.92}
 <section class="hero">
   <div class="container">
     <div class="content">
-      <h1>Computer, Tablet, Monitor & Printer Repair</h1>
-      <p>Fast diagnostics, clear estimates, and professional work. Use the calculator, then request a technician.</p>
+      <h1>Computer, Tablet, Display & Printer Repair</h1>
+      <p>We replace laptop & tablet displays, batteries, charging ports, do diagnostics, cleanup and setup.</p>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
         <button class="btn btn-primary" id="btnTech">Call a Technician</button>
@@ -265,7 +261,7 @@ footer p{opacity:.92}
       <div class="t"><div class="ic">⚡</div><div><b>Fast response</b><span>Quick reply and clear next steps.</span></div></div>
       <div class="t"><div class="ic">🛡️</div><div><b>Data-safe approach</b><span>Careful work with drives and accounts.</span></div></div>
       <div class="t"><div class="ic">✅</div><div><b>Estimate first</b><span>We confirm the estimate before repair.</span></div></div>
-      <div class="t"><div class="ic">🏠</div><div><b>Home & office</b><span>Printers, Wi-Fi, monitors, setups.</span></div></div>
+      <div class="t"><div class="ic">🏠</div><div><b>Home & office</b><span>Printers, Wi-Fi, setups, diagnostics.</span></div></div>
     </div>
   </div>
 </section>
@@ -273,19 +269,47 @@ footer p{opacity:.92}
 <section class="section" id="services">
   <div class="container">
     <h2>What we do</h2>
-    <p class="sub">Typical services: screens, monitors, batteries, ports, upgrades, printers, Wi-Fi and more.</p>
+    <p class="sub">Typical services: laptop/tablet display replacement, batteries, charging ports, tune-up, printers, Wi-Fi and more.</p>
 
     <div class="cards">
-      <div class="card"><div class="icon">💻</div><h3>PC / Laptop</h3><p>Diagnostics, tune-up, virus removal, OS reinstall, data transfer, upgrades, keyboard, battery, screen (labor), overheating cleaning.</p></div>
-      <div class="card"><div class="icon">📲</div><h3>Tablet / iPad</h3><p>Screen (labor), battery (labor), charging issues/port, performance cleanup, setup & syncing.</p></div>
-      <div class="card"><div class="icon">🖥️</div><h3>Monitors / Screens</h3><p>Diagnostics, no display/flicker, power issues, port/cable troubleshooting, setup.</p></div>
-      <div class="card"><div class="icon">🖨️</div><h3>Printers & Scanners</h3><p>Drivers/setup, Wi-Fi printing, errors, paper feed issues, scanner troubleshooting.</p></div>
+      <div class="card">
+        <div class="icon">💻</div>
+        <h3>PC / Laptop</h3>
+        <p>Diagnostics, tune-up, virus removal, OS reinstall, data transfer, upgrades, keyboard, battery, display (labor), overheating cleaning.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon">📲</div>
+        <h3>Tablet / iPad</h3>
+        <p>Display (labor), battery (labor), charging port issues, performance cleanup, setup & syncing.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🖨️</div>
+        <h3>Printers & Scanners</h3>
+        <p>Drivers/setup, Wi-Fi printing, errors, paper feed issues, scanner troubleshooting.</p>
+      </div>
+
+      <div class="card">
+        <div class="icon">🔧</div>
+        <h3>Digital Device Repair</h3>
+        <p>Diagnostics for digital electronics, charging issues, batteries, displays (labor), cleanup/performance and setup.</p>
+      </div>
     </div>
 
     <div class="gallery">
-      <div class="photo"><img src="assets/service-laptop.jpg" alt="Laptop service"><div class="cap"><b>Laptop service</b><span>Cleanup, upgrades, reinstall, diagnostics.</span></div></div>
-      <div class="photo"><img src="assets/service-tablet.jpg" alt="Tablet service"><div class="cap"><b>Tablet service</b><span>Screen/battery labor, charging, performance.</span></div></div>
-      <div class="photo"><img src="assets/service-printer.jpg" alt="Printer service"><div class="cap"><b>Printer service</b><span>Drivers, Wi-Fi printing, errors, jams.</span></div></div>
+      <div class="photo">
+        <img src="assets/service-laptop.jpg" alt="Laptop service">
+        <div class="cap"><b>Laptop service</b><span>Cleanup, upgrades, reinstall, diagnostics.</span></div>
+      </div>
+      <div class="photo">
+        <img src="assets/service-tablet.jpg" alt="Tablet service">
+        <div class="cap"><b>Tablet service</b><span>Display/battery labor, charging, performance.</span></div>
+      </div>
+      <div class="photo">
+        <img src="assets/service-printer.jpg" alt="Printer service">
+        <div class="cap"><b>Printer service</b><span>Drivers, Wi-Fi printing, errors, jams.</span></div>
+      </div>
     </div>
 
     <div class="cta">
@@ -310,9 +334,9 @@ footer p{opacity:.92}
           <select id="device">
             <option value="laptop">Laptop / PC</option>
             <option value="tablet">Tablet / iPad</option>
-            <option value="monitor">Monitor / Screen</option>
             <option value="printer">Printer / Scanner</option>
-            <option value="wifi">Wi-Fi / Home Setup</option>
+            <option value="wifi">Wi-Fi / Setup</option>
+            <option value="digital">Digital Device (Other)</option>
           </select>
         </div>
 
@@ -337,7 +361,6 @@ footer p{opacity:.92}
       </div>
 
       <div class="price" id="price">$95 – $140</div>
-
       <div class="small-note">Final estimate depends on diagnostics and parts (if needed). We confirm the quote before any work.</div>
     </div>
   </div>
@@ -363,7 +386,7 @@ footer p{opacity:.92}
   </div>
 </footer>
 
-<!-- MODAL: Call a Technician -->
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-card">
     <div class="modal-head">
@@ -385,7 +408,7 @@ footer p{opacity:.92}
 
         <div style="margin-top:14px">
           <label>What’s the problem?</label>
-          <textarea name="problem" rows="4" required placeholder="Describe the issue (laptop screen / tablet battery / monitor no display / printer not printing / Wi-Fi setup...)"></textarea>
+          <textarea name="problem" rows="4" required placeholder="Laptop display / tablet battery / printer not printing / charging port / Wi-Fi setup..."></textarea>
         </div>
 
         <input type="hidden" name="device" id="m_device">
@@ -394,7 +417,7 @@ footer p{opacity:.92}
         <input type="hidden" name="estimate" id="m_estimate">
 
         <div class="modal-actions">
-          <button class="btn btn-primary" type="submit">Send request</button>
+          <button class="btn btn-primary" type="submit">Send to WhatsApp</button>
           <button class="btn btn-secondary" type="button" onclick="location.href='tel:8134386556'">Call now</button>
         </div>
 
@@ -405,6 +428,7 @@ footer p{opacity:.92}
 </div>
 
 <script>
+/* Prices (labor ranges) */
 const PRICE_TABLE = {
   laptop: [
     { id:"diag",    label:"Diagnostics / inspection",            range:[60, 95] },
@@ -414,40 +438,40 @@ const PRICE_TABLE = {
     { id:"data",    label:"Data transfer / backup",              range:[95, 180] },
     { id:"upgrade", label:"SSD/RAM upgrade (labor)",             range:[80, 160] },
     { id:"thermal", label:"Overheating cleaning (labor)",        range:[90, 180] },
-    { id:"screen",  label:"Laptop screen replacement (labor)",   range:[120, 260] },
+    { id:"display", label:"Laptop display replacement (labor)",  range:[120, 260] },
     { id:"battery", label:"Laptop battery replacement (labor)",  range:[90, 190] },
     { id:"kbd",     label:"Keyboard replacement (labor)",        range:[90, 200] },
     { id:"dcjack",  label:"Charging port / DC jack (labor)",     range:[110, 240] }
   ],
   tablet: [
     { id:"diag",    label:"Diagnostics / inspection",            range:[60, 95] },
-    { id:"screen",  label:"Tablet screen replacement (labor)",   range:[120, 280] },
+    { id:"display", label:"Tablet display replacement (labor)",  range:[120, 280] },
     { id:"battery", label:"Tablet battery replacement (labor)",  range:[90, 210] },
     { id:"charge",  label:"Charging port / connection issue",    range:[110, 240] },
     { id:"slow",    label:"Cleanup / performance",               range:[80, 160] },
     { id:"setup",   label:"Setup / sync / accounts",             range:[70, 150] },
     { id:"water",   label:"Water damage cleaning",               range:[120, 280] }
   ],
-  monitor: [
-    { id:"diag",    label:"Monitor diagnostics (no display/flicker)", range:[60, 120] },
-    { id:"power",   label:"Power issue / won’t turn on",              range:[80, 170] },
-    { id:"ports",   label:"Ports/cables troubleshooting",             range:[60, 140] },
-    { id:"screen",  label:"Screen replacement (labor when applicable)",range:[120, 260] },
-    { id:"setup",   label:"Monitor setup / dual monitor setup",       range:[80, 160] }
-  ],
   printer: [
-    { id:"diag",     label:"Diagnostics / inspection",            range:[60, 95] },
-    { id:"setup",    label:"Setup / drivers / install",           range:[80, 150] },
-    { id:"notprint", label:"Not printing / errors",               range:[90, 180] },
-    { id:"wifi",     label:"Wireless printing setup",             range:[80, 150] },
-    { id:"jam",      label:"Paper jam / feed issue",              range:[80, 160] },
-    { id:"scan",     label:"Scanner not working",                 range:[80, 160] }
+    { id:"diag",     label:"Diagnostics / inspection",           range:[60, 95] },
+    { id:"setup",    label:"Setup / drivers / install",          range:[80, 150] },
+    { id:"notprint", label:"Not printing / errors",              range:[90, 180] },
+    { id:"wifi",     label:"Wireless printing setup",            range:[80, 150] },
+    { id:"jam",      label:"Paper jam / feed issue",             range:[80, 160] },
+    { id:"scan",     label:"Scanner not working",                range:[80, 160] }
   ],
   wifi: [
-    { id:"diag",     label:"Wi-Fi diagnostics",                   range:[60, 110] },
-    { id:"router",   label:"Router setup / optimization",         range:[90, 170] },
-    { id:"mesh",     label:"Mesh Wi-Fi setup",                    range:[120, 240] },
-    { id:"smart",    label:"Smart devices setup",                 range:[90, 190] }
+    { id:"diag",     label:"Wi-Fi diagnostics",                  range:[60, 110] },
+    { id:"router",   label:"Router setup / optimization",        range:[90, 170] },
+    { id:"mesh",     label:"Mesh Wi-Fi setup",                   range:[120, 240] },
+    { id:"smart",    label:"Smart devices setup",                range:[90, 190] }
+  ],
+  digital: [
+    { id:"diag",     label:"Diagnostics / inspection",           range:[60, 120] },
+    { id:"battery",  label:"Battery replacement (labor)",        range:[90, 220] },
+    { id:"display",  label:"Display replacement (labor)",        range:[120, 280] },
+    { id:"charge",   label:"Charging issue / port",              range:[110, 260] },
+    { id:"setup",    label:"Setup / troubleshooting",            range:[80, 180] }
   ]
 };
 
@@ -534,9 +558,11 @@ btnTechA.addEventListener("click",openModal);
 modalClose.addEventListener("click",closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
+/* Submit -> WhatsApp (works on Netlify without backend) */
 techForm.addEventListener("submit",(e)=>{
   e.preventDefault();
   const obj = Object.fromEntries(new FormData(techForm).entries());
+
   const msg =
 `New technician request:
 Name: ${obj.name}
@@ -546,9 +572,12 @@ Problem: ${obj.problem}
 Device: ${obj.device}
 Service: ${obj.service}
 Urgency: ${obj.urgency}
-Estimate: ${obj.estimate || "not calculated"}`;
+Estimate: ${obj.estimate || "not calculated"}
+Page: ${window.location.href}`;
 
-  window.location.href = `sms:18134386556?&body=${encodeURIComponent(msg)}`;
+  const waNumber = "18134386556"; // change if needed
+  const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
+  window.open(url, "_blank");
 });
 </script>
 
