@@ -1,17 +1,21 @@
-export async function handler(event) {
-  // CORS (на всякий случай)
+export default async function handler(req, res) {
+  // CORS
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: corsHeaders, body: "ok" };
+  // Preflight
+  if (req.method === "OPTIONS") {
+    Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
+    return res.status(200).send("ok");
   }
 
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: corsHeaders, body: "Method Not Allowed" };
+  if (req.method !== "POST") {
+    Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
+    res.setHeader("Allow", "POST, OPTIONS");
+    return res.status(405).send("Method Not Allowed");
   }
 
   // --- helpers ---
@@ -33,8 +37,6 @@ export async function handler(event) {
       return { ok: false, skipped: "env_missing" };
     }
 
-    // ✅ ВАЖНО: в ERPNext поле "notes" — это child table, туда нельзя строку.
-    // Поэтому кладем текст в remarks (обычное текстовое поле).
     const remarksText = [
       data.details ? `Details: ${data.details}` : null,
       data.page ? `Page: ${data.page}` : null,
@@ -50,11 +52,10 @@ export async function handler(event) {
       mobile_no: data.phone || "",
       email_id: data.email || "",
       city: data.city || "",
-      source: normalizeSource(data.source), // Website / Facebook / Google
-      remarks: remarksText,                 // ✅ текст сюда
+      source: normalizeSource(data.source),
+      remarks: remarksText,
     };
 
-    // ВАЖНО: ngrok предупреждение обходим этим заголовком
     const r = await fetch(`${base.replace(/\/$/, "")}/api/resource/Lead`, {
       method: "POST",
       headers: {
@@ -75,7 +76,7 @@ export async function handler(event) {
 
   async function sendToWhatsApp(msg) {
     const token = process.env.WHATSAPP_TOKEN;
-    const phoneId = process.env.WHATSAPP_PHONE_ID;
+    const phoneId = process.env.WHATSAPP_PHONE_ID; // важно: у тебя именно так
     const to = process.env.WHATSAPP_TO;
 
     if (!token || !phoneId || !to) {
@@ -111,12 +112,11 @@ export async function handler(event) {
 
   // --- main ---
   try {
-    const data = JSON.parse(event.body || "{}");
+    // Vercel обычно уже даёт объект, но подстрахуемся
+    const data = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
 
     console.log("LEAD RECEIVED:", data);
-    console.log("LEAD RAW BODY LENGTH:", (event.body || "").length);
 
-    // Сообщение в WhatsApp
     const msg = `🔔 New Lead (Lucky Handyman)
 
 Name: ${data.name || "-"}
@@ -127,30 +127,22 @@ Source: ${data.source || "-"}
 Page: ${data.page || "-"}
 Time: ${data.ts || "-"}`;
 
-    // 1) Шлём в WhatsApp
     const waResult = await sendToWhatsApp(msg);
-
-    // 2) Шлём в ERPNext
     const erpResult = await sendToERPNext(data);
 
-    // НИКОГДА не валим форму, даже если WA/ERP упали
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        ok: true,
-        whatsapp: waResult.ok ? "sent" : (waResult.skipped || "failed"),
-        erpnext: erpResult.ok ? "created" : (erpResult.skipped || "failed"),
-        erp_status: erpResult.status || null,
-        wa_status: waResult.status || null,
-      }),
-    };
+    Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
+
+    // Никогда не валим форму
+    return res.status(200).json({
+      ok: true,
+      whatsapp: waResult.ok ? "sent" : (waResult.skipped || "failed"),
+      erpnext: erpResult.ok ? "created" : (erpResult.skipped || "failed"),
+      erp_status: erpResult.status || null,
+      wa_status: waResult.status || null,
+    });
   } catch (err) {
     console.error("LEAD ERROR:", err);
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ ok: false, error: "server_error" }),
-    };
+    Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
+    return res.status(500).json({ ok: false, error: "server_error" });
   }
 }
