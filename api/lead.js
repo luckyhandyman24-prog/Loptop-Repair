@@ -75,40 +75,37 @@ export default async function handler(req, res) {
   }
 
   async function sendToWhatsApp(msg) {
-    const token = process.env.WHATSAPP_TOKEN;
-    const phoneId = process.env.WHATSAPP_PHONE_ID; // важно: у тебя именно так
-    const to = process.env.WHATSAPP_TO;
+  const token = process.env.WHATSAPP_TOKEN;
+  const phoneId = process.env.WHATSAPP_PHONE_ID;
+  const to = String(process.env.WHATSAPP_TO || "").replace(/[^\d]/g, "");
 
-    if (!token || !phoneId || !to) {
-      console.log("WHATSAPP ENV MISSING:", {
-        hasToken: !!token,
-        hasPhoneId: !!phoneId,
-        hasTo: !!to,
-      });
-      return { ok: false, skipped: "env_missing" };
-    }
-
-    const r = await fetch(`https://graph.facebook.com/v22.0/${phoneId}/messages`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        to,
-        type: "text",
-        text: { body: msg },
-      }),
-    });
-
-    const resultText = await r.text();
-    console.log("WHATSAPP STATUS:", r.status);
-    console.log("WHATSAPP BODY:", resultText);
-
-    if (!r.ok) return { ok: false, status: r.status, body: resultText };
-    return { ok: true };
+  if (!token || !phoneId || !to) {
+    return { ok: false, skipped: "env_missing" };
   }
+
+  const url = `https://graph.facebook.com/v22.0/${phoneId}/messages`;
+
+  const r = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      messaging_product: "whatsapp",
+      recipient_type: "individual",
+      to,
+      type: "text",
+      text: { preview_url: false, body: msg },
+    }),
+  });
+
+  const resultText = await r.text();
+
+  // важно: отдаём наружу причину
+  if (!r.ok) return { ok: false, status: r.status, body: resultText, url };
+  return { ok: true, status: r.status, body: resultText, url };
+}
 
   // --- main ---
   try {
@@ -133,13 +130,13 @@ Time: ${data.ts || "-"}`;
     Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
 
     // Никогда не валим форму
-    return res.status(200).json({
-      ok: true,
-      whatsapp: waResult.ok ? "sent" : (waResult.skipped || "failed"),
-      erpnext: erpResult.ok ? "created" : (erpResult.skipped || "failed"),
-      erp_status: erpResult.status || null,
-      wa_status: waResult.status || null,
-    });
+  return res.status(200).json({
+  ok: true,
+  whatsapp: wa.ok ? "sent" : "failed",
+  wa_status: wa.status || null,
+  wa_body: wa.body || null,   // ✅ вот тут будет причина
+  wa_url: wa.url || null
+});
   } catch (err) {
     console.error("LEAD ERROR:", err);
     Object.entries(corsHeaders).forEach(([k, v]) => res.setHeader(k, v));
