@@ -1,5 +1,6 @@
+// /api/lead.js
 export default async function handler(req, res) {
-  // CORS (если форма на другом домене)
+  // CORS (на всякий случай)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -15,68 +16,84 @@ export default async function handler(req, res) {
     const lead = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     console.log("LEAD RECEIVED:", { ts, lead });
 
+    // ✅ ENV
     const token = process.env.WA_TOKEN;
-    const phoneNumberId = process.env.WA_PHONE_NUMBER_ID; // именно Phone Number ID, не WABA ID
-    const to = (process.env.WA_TO || "").replace(/[^\d]/g, ""); // оставляем только цифры
+    const phoneNumberId = process.env.WA_PHONE_NUMBER_ID;
 
-    if (!token || !phoneNumberId || !to) {
-      const missing = { hasToken: !!token, hasPhoneNumberId: !!phoneNumberId, hasTo: !!to };
+    // ✅ 2 номера получателей (второй можно не задавать)
+    const to1 = (process.env.WA_TO || "").replace(/[^\d]/g, "");
+    const to2 = (process.env.WA_TO_2 || "").replace(/[^\d]/g, "");
+
+    // список получателей без пустых и без дублей
+    const recipients = Array.from(new Set([to1, to2].filter(Boolean)));
+
+    if (!token || !phoneNumberId || recipients.length === 0) {
+      const missing = {
+        hasToken: !!token,
+        hasPhoneNumberId: !!phoneNumberId,
+        hasTo1: !!to1,
+        hasTo2: !!to2,
+      };
       console.log("WHATSAPP ENV MISSING:", missing);
-      return res.status(500).json({
-        ok: false,
-        stage: "env",
-        missing,
-      });
+      return res.status(500).json({ ok: false, stage: "env", missing });
     }
 
     const url = `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`;
 
+    // ✅ Текст сообщения
     const text =
       `🧰 New Tech Repair Lead\n` +
       `Name: ${lead.name || "-"}\n` +
       `Phone: ${lead.phone || "-"}\n` +
       `City: ${lead.city || "-"}\n` +
+      `Device: ${lead.device || "-"}\n` +
+      `Service: ${lead.service || "-"}\n` +
+      `Urgency: ${lead.urgency || "-"}\n` +
       `Details: ${lead.details || "-"}\n` +
       `Page: ${lead.page || lead.url || "-"}\n` +
       `Time: ${ts}`;
 
-    const payload = {
+    const payloadBase = {
       messaging_product: "whatsapp",
-      to,
       type: "text",
-      text: { body: text }
+      text: { body: text },
     };
 
-    let wa_status = 0;
-    let wa_body_text = "";
-    let wa_body_json = null;
+    // ✅ Отправка на оба номера + сбор результатов
+    const wa_results = [];
 
-    const r = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    for (const to of recipients) {
+      const r = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...payloadBase, to }),
+      });
 
-    wa_status = r.status;
-    wa_body_text = await r.text();
+      const bodyText = await r.text();
+      let bodyJson = null;
+      try {
+        bodyJson = JSON.parse(bodyText);
+      } catch (_) {}
 
-    try { wa_body_json = JSON.parse(wa_body_text); } catch (_) {}
+      const result = {
+        to,
+        wa_status: r.status,
+        wa_body: bodyJson || bodyText,
+      };
 
-    console.log("WA META RESPONSE:", { wa_status, wa_body: wa_body_json || wa_body_text });
+      wa_results.push(result);
+      console.log("WA SEND RESULT:", result);
+    }
 
-    // ВАЖНО: возвращаем клиенту диагностический ответ
     return res.status(200).json({
       ok: true,
       ts,
       lead_received: lead,
-      wa_status,
-      wa_body: wa_body_json || wa_body_text,
-      hint: "Пришли мне этот JSON (Network → Response) одним куском."
+      wa_results,
     });
-
   } catch (e) {
     console.log("API ERROR:", String(e?.stack || e));
     return res.status(500).json({
