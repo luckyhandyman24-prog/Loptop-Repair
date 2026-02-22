@@ -571,7 +571,8 @@ techForm.addEventListener("submit", async (e) => {
 
   const payload = {
     name: obj.name || "",
-    phone: obj.phone || "",
+    // ✅ только цифры
+    phone: (obj.phone || "").replace(/[^\d]/g, ""),
     city: "",
     details: obj.problem || "",
     source: "website-popup",
@@ -592,6 +593,34 @@ techForm.addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+
+    const j = await r.json().catch(() => null);
+
+    if (!r.ok || !j || j.ok !== true) {
+      console.warn("API /api/lead failed:", r.status, j);
+      if (statusEl) statusEl.textContent = "Error sending. Please call us: (813) 438-6556";
+      return;
+    }
+
+    // ✅ проверяем, что WA реально "sent"
+    if (j.whatsapp !== "sent") {
+      console.warn("WhatsApp not sent:", j);
+      if (statusEl) statusEl.textContent = "Sent to system, but WhatsApp not delivered. Please call us: (813) 438-6556";
+      return;
+    }
+
+    if (statusEl) statusEl.textContent = "Sent ✅ We will contact you soon.";
+    techForm.reset();
+
+    setTimeout(() => closeModal(), 900);
+
+  } catch (err) {
+    console.warn("API /api/lead error:", err);
+    if (statusEl) statusEl.textContent = "Network error. Please call us: (813) 438-6556";
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "Send request"; }
+  }
+});
 
     const text = await r.text().catch(() => "");
 
