@@ -417,7 +417,8 @@ footer p{opacity:.92}
         <input type="hidden" name="estimate" id="m_estimate">
 
         <div class="modal-actions">
-          <button class="btn btn-primary" type="submit">Send to WhatsApp</button>
+          <!-- ✅ исправили: теперь просто Send request -->
+          <button class="btn btn-primary" id="sendBtn" type="submit">Send request</button>
           <button class="btn btn-secondary" type="button" onclick="location.href='tel:8134386556'">Call now</button>
         </div>
 
@@ -548,6 +549,7 @@ function openModal(){
   document.getElementById("m_service").value = selectedText(problemEl);
   document.getElementById("m_urgency").value = urgencyText();
   document.getElementById("m_estimate").value = (calcStarted ? priceEl.textContent : "");
+  document.getElementById("modalStatus").textContent = "";
   modal.classList.add("open");
 }
 function closeModal(){ modal.classList.remove("open"); }
@@ -558,16 +560,15 @@ btnTechA.addEventListener("click",openModal);
 modalClose.addEventListener("click",closeModal);
 modal.addEventListener("click",(e)=>{ if(e.target===modal) closeModal(); });
 
-/* Submit -> API + WhatsApp */
+/* ✅ Submit -> ONLY API (NO opening WhatsApp for user) */
 techForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const status = document.getElementById("modalStatus");
-  if (status) status.textContent = "Sending…";
+  const statusEl = document.getElementById("modalStatus");
+  const sendBtn = document.getElementById("sendBtn");
 
   const obj = Object.fromEntries(new FormData(techForm).entries());
 
-  // 1) Отправляем лид на сервер (Vercel /api/lead) -> WhatsApp API + ERPNext
   const payload = {
     name: obj.name || "",
     phone: obj.phone || "",
@@ -583,38 +584,36 @@ techForm.addEventListener("submit", async (e) => {
   };
 
   try {
+    if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = "Sending…"; }
+    if (statusEl) statusEl.textContent = "Sending request…";
+
     const r = await fetch("/api/lead", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
+    const text = await r.text().catch(() => "");
+
     if (!r.ok) {
-      const t = await r.text().catch(() => "");
-      console.warn("API /api/lead failed:", r.status, t);
+      console.warn("API /api/lead failed:", r.status, text);
+      if (statusEl) statusEl.textContent = "Error sending. Please call us: (813) 438-6556";
+      return;
     }
+
+    // успех
+    if (statusEl) statusEl.textContent = "Sent ✅ We will contact you soon.";
+    techForm.reset();
+
+    // можно закрывать модалку через 1 сек
+    setTimeout(() => closeModal(), 900);
+
   } catch (err) {
     console.warn("API /api/lead error:", err);
+    if (statusEl) statusEl.textContent = "Network error. Please call us: (813) 438-6556";
+  } finally {
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.textContent = "Send request"; }
   }
-
-  // 2) Открываем WhatsApp клиенту (как было)
-  const msg =
-`New technician request:
-Name: ${obj.name}
-Phone: ${obj.phone}
-Problem: ${obj.problem}
-
-Device: ${obj.device}
-Service: ${obj.service}
-Urgency: ${obj.urgency}
-Estimate: ${obj.estimate || "not calculated"}
-Page: ${window.location.href}`;
-
-  const waNumber = "18134386556"; // куда клиент пишет
-  const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
-  window.open(url, "_blank");
-
-  if (status) status.textContent = "Sent. Opening WhatsApp…";
 });
 </script>
 
