@@ -1,92 +1,88 @@
 export default async function handler(req, res) {
-  // CORS
+  // CORS (если форма на другом домене)
   res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  if (req.method === "OPTIONS") return res.status(200).end();
 
-  if (req.method === "OPTIONS") return res.status(200).send("ok");
-  if (req.method !== "POST") return res.status(405).send("Method Not Allowed");
+  if (req.method !== "POST") {
+    return res.status(405).json({ ok: false, error: "Method Not Allowed" });
+  }
 
-  const safeDigits = (v) => String(v || "").replace(/[^\d]/g, "");
+  const ts = new Date().toISOString();
 
-  async function sendToWhatsApp(msg) {
-    const token = process.env.WHATSAPP_TOKEN;
-    const phoneNumberId = process.env.WHATSAPP_PHONE_ID; // ✅ Phone Number ID (не WABA)
-    const to = safeDigits(process.env.WHATSAPP_TO);
+  try {
+    const lead = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    console.log("LEAD RECEIVED:", { ts, lead });
+
+    const token = process.env.WA_TOKEN;
+    const phoneNumberId = process.env.WA_PHONE_NUMBER_ID; // именно Phone Number ID, не WABA ID
+    const to = (process.env.WA_TO || "").replace(/[^\d]/g, ""); // оставляем только цифры
 
     if (!token || !phoneNumberId || !to) {
-      return {
+      const missing = { hasToken: !!token, hasPhoneNumberId: !!phoneNumberId, hasTo: !!to };
+      console.log("WHATSAPP ENV MISSING:", missing);
+      return res.status(500).json({
         ok: false,
-        skipped: "env_missing",
-        debug: { hasToken: !!token, hasPhoneId: !!phoneNumberId, hasTo: !!to },
-      };
+        stage: "env",
+        missing,
+      });
     }
 
-    const url = `https://graph.facebook.com/v22.0/${phoneNumberId}/messages`;
+    const url = `https://graph.facebook.com/v20.0/${phoneNumberId}/messages`;
+
+    const text =
+      `🧰 New Tech Repair Lead\n` +
+      `Name: ${lead.name || "-"}\n` +
+      `Phone: ${lead.phone || "-"}\n` +
+      `City: ${lead.city || "-"}\n` +
+      `Details: ${lead.details || "-"}\n` +
+      `Page: ${lead.page || lead.url || "-"}\n` +
+      `Time: ${ts}`;
+
+    const payload = {
+      messaging_product: "whatsapp",
+      to,
+      type: "text",
+      text: { body: text }
+    };
+
+    let wa_status = 0;
+    let wa_body_text = "";
+    let wa_body_json = null;
 
     const r = await fetch(url, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        messaging_product: "whatsapp",
-        recipient_type: "individual",
-        to, // ✅ только цифры, без +
-        type: "text",
-        text: { preview_url: false, body: msg },
-      }),
+      body: JSON.stringify(payload),
     });
 
-    const bodyText = await r.text().catch(() => "");
+    wa_status = r.status;
+    wa_body_text = await r.text();
 
-    return {
-      ok: r.ok,
-      status: r.status,
-      body: bodyText,
-      url,
-      to,
-      phoneNumberId,
-    };
-  }
+    try { wa_body_json = JSON.parse(wa_body_text); } catch (_) {}
 
-  try {
-    // На Vercel req.body обычно уже объект. Но подстрахуемся.
-    const data =
-      typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+    console.log("WA META RESPONSE:", { wa_status, wa_body: wa_body_json || wa_body_text });
 
-    const msg = `🔔 New Lead (Tampa Tech Repair)
-
-Name: ${data.name || "-"}
-Phone: ${data.phone || "-"}
-Details: ${data.details || "-"}
-Device: ${data.device || "-"}
-Service: ${data.service || "-"}
-Urgency: ${data.urgency || "-"}
-Estimate: ${data.estimate || "-"}
-Page: ${data.page || "-"}
-Time: ${data.ts || "-"}`;
-
-    const wa = await sendToWhatsApp(msg);
-
-    // ✅ Важно: возвращаем всё для диагностики (без токена)
+    // ВАЖНО: возвращаем клиенту диагностический ответ
     return res.status(200).json({
       ok: true,
-      whatsapp: wa.ok ? "sent" : (wa.skipped || "failed"),
-      wa_status: wa.status || null,
-      wa_body: wa.body || null,       // ← тут будет ПРИЧИНА (ошибка Meta)
-      wa_url: wa.url || null,
-      wa_to: wa.to || null,
-      wa_phone_id: wa.phoneNumberId || null,
-      env_debug: wa.debug || null,
+      ts,
+      lead_received: lead,
+      wa_status,
+      wa_body: wa_body_json || wa_body_text,
+      hint: "Пришли мне этот JSON (Network → Response) одним куском."
     });
-  } catch (err) {
-    // ✅ Не “server_error” вслепую — а что именно сломалось
-    return res.status(200).json({
+
+  } catch (e) {
+    console.log("API ERROR:", String(e?.stack || e));
+    return res.status(500).json({
       ok: false,
-      error: "server_error",
-      err_message: String(err?.message || err),
+      stage: "exception",
+      error: String(e?.message || e),
     });
   }
 }
