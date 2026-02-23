@@ -618,8 +618,25 @@ document.getElementById("techForm").addEventListener("submit", function(e){
   });
 });
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
 
+  const buttons = document.querySelectorAll('a.btn.btn-primary');
+
+  buttons.forEach(function(btn) {
+    if (btn.textContent.trim().includes("Call a Technician")) {
+      btn.addEventListener("click", function () {
+        if (typeof fbq === "function") {
+          fbq("track", "Lead");
+        }
+      });
+    }
+  });
+
+});
+</script>
 </body>
 
 </html>
+
 
