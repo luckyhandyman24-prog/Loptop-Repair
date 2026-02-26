@@ -577,18 +577,17 @@ document.getElementById("techForm").addEventListener("submit", function(e){
 
   const obj = Object.fromEntries(new FormData(this).entries());
   const payload = {
-    name: obj.name || "",
-    phone: obj.phone || "",
-    city: "",
-    details: obj.problem || "",
-    source: "website-popup",
-    page: window.location.href,
-    ts: new Date().toISOString(),
-    device: obj.device || "",
-    service: obj.service || "",
-    urgency: obj.urgency || "",
-    estimate: obj.estimate || ""
-  };
+  name: obj.name || "",
+  phone: obj.phone || "",
+  city: "",
+  details:
+    (obj.problem || "") +
+    (obj.device ? `\n\nDevice: ${obj.device}` : "") +
+    (obj.service ? `\nService: ${obj.service}` : "") +
+    (obj.urgency ? `\nUrgency: ${obj.urgency}` : "") +
+    (obj.estimate ? `\nEstimate: ${obj.estimate}` : ""),
+  page: window.location.href
+};
 
   if(sendBtn){ sendBtn.disabled=true; sendBtn.textContent="Sending…"; }
   if(statusEl) statusEl.textContent="Sending request…";
@@ -638,6 +637,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 
 </html>
+
 
 
 
