@@ -218,6 +218,17 @@ footer p{opacity:.92}
   .btn + .btn{margin-left:0;margin-top:10px}
   .cta{justify-content:flex-start}
 }
+  /* SMS button */
+.btn-green{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#fff;
+  box-shadow:0 10px 22px rgba(34,197,94,.22);
+}
+.btn-green:hover{
+  transform:translateY(-2px);
+  box-shadow:0 14px 30px rgba(34,197,94,.30);
+  filter:saturate(1.05)
+}
 </style>
   <!-- Meta Pixel Code -->
 <script>
@@ -264,10 +275,28 @@ src="https://www.facebook.com/tr?id=916231667558801&ev=PageView&noscript=1"
       <p>We replace laptop & tablet displays, batteries, charging ports, do diagnostics, cleanup and setup.</p>
 
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-        <a class="btn btn-primary" href="#modal">Call a Technician</a>
-        <a class="btn btn-secondary" href="#calc" onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'});return false;">Open Calculator</a>
-        <a class="btn btn-ghost" href="#services" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'});return false;">Services</a>
-      </div>
+
+  <a class="btn btn-primary" href="#modal">Call a Technician</a>
+
+  <!-- NEW SMS BUTTON -->
+  <a class="btn btn-green"
+     href="sms:+18134386556?body=Hi%20I%20need%20help%20with%20my%20computer%20or%20laptop">
+     Text Now
+  </a>
+
+  <a class="btn btn-secondary"
+     href="#calc"
+     onclick="document.getElementById('calc').scrollIntoView({behavior:'smooth'});return false;">
+     Open Calculator
+  </a>
+
+  <a class="btn btn-ghost"
+     href="#services"
+     onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'});return false;">
+     Services
+  </a>
+
+</div>
 
       <div class="small-note" style="margin-top:12px">Serving Tampa Bay • Same-day available for many issues</div>
     </div>
@@ -637,6 +666,7 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 
 </html>
+
 
 
 
